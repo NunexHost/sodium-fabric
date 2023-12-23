@@ -22,7 +22,7 @@ public class ChunkMeshBufferBuilder {
         this.encoder = vertexType.getEncoder();
         this.stride = vertexType.getVertexFormat().getStride();
 
-        this.buffer = null;
+        this.buffer = MemoryUtil.memAlloc(initialCapacity * this.stride);
 
         this.capacity = initialCapacity;
         this.initialCapacity = initialCapacity;
@@ -32,8 +32,8 @@ public class ChunkMeshBufferBuilder {
         var vertexStart = this.count;
         var vertexCount = vertices.length;
 
-        if (this.count + vertexCount >= this.capacity) {
-            this.grow(this.stride * vertexCount);
+        if (this.count + vertexCount > this.capacity) {
+            this.grow(vertexCount);
         }
 
         long ptr = MemoryUtil.memAddress(this.buffer, this.count * this.stride);
@@ -46,23 +46,23 @@ public class ChunkMeshBufferBuilder {
     }
 
     private void grow(int len) {
-        // The new capacity will at least as large as the write it needs to service
+        // The new capacity will be at least as large as the write it needs to service
         int cap = Math.max(this.capacity * 2, this.capacity + len);
 
-        // Update the buffer and capacity now
-        this.setBufferSize(cap * this.stride);
-    }
+        // Use a direct buffer to avoid unnecessary copies
+        ByteBuffer newBuffer = MemoryUtil.memAllocDirect(cap * this.stride);
 
-    private void setBufferSize(int capacity) {
-        this.buffer = MemoryUtil.memRealloc(this.buffer, capacity * this.stride);
-        this.capacity = capacity;
+        // Copy the existing data to the new buffer
+        MemoryUtil.memCopy(this.buffer, 0, newBuffer, 0, this.count * this.stride);
+
+        // Update the references
+        this.buffer = newBuffer;
+        this.capacity = cap;
     }
 
     public void start(int sectionIndex) {
         this.count = 0;
         this.sectionIndex = sectionIndex;
-
-        this.setBufferSize(this.initialCapacity);
     }
 
     public void destroy() {
@@ -82,10 +82,26 @@ public class ChunkMeshBufferBuilder {
             throw new IllegalStateException("No vertex data in buffer");
         }
 
-        return MemoryUtil.memSlice(this.buffer, 0, this.stride * this.count);
+        return this.buffer.slice(0, this.count * this.stride);
     }
 
     public int count() {
         return this.count;
+    }
+
+    // Additional changes:
+
+    /**
+     * Returns the current capacity of the buffer, in bytes.
+     */
+    public int getCapacity() {
+        return this.capacity * this.stride;
+    }
+
+    /**
+     * Returns the amount of unused space remaining in the buffer, in bytes.
+     */
+    public int getRemainingCapacity() {
+        return this.capacity - this.count * this.stride;
     }
 }
