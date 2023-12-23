@@ -61,7 +61,7 @@ public abstract class ShaderChunkRenderer implements ChunkRenderer {
     }
 
     protected void begin(TerrainRenderPass pass) {
-        pass.startDrawing();
+//        pass.startDrawing();
 
         ChunkShaderOptions options = new ChunkShaderOptions(ChunkFogMode.SMOOTH, pass);
 
@@ -74,7 +74,7 @@ public abstract class ShaderChunkRenderer implements ChunkRenderer {
         this.activeProgram.unbind();
         this.activeProgram = null;
 
-        pass.endDrawing();
+//        pass.endDrawing();
     }
 
     @Override
