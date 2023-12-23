@@ -83,6 +83,6 @@ public abstract class ShaderChunkRenderer implements ChunkRenderer {
 //    public void delete(CommandList commandList) {
 //        this.programs.values()
  //               .forEach(GlProgram::delete);
-    }
+//    }
 
-}
+//}
