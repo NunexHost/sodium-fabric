@@ -8,7 +8,6 @@ import net.minecraft.world.chunk.WorldChunk;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class ClonedChunkSectionCache {
@@ -17,7 +16,7 @@ public class ClonedChunkSectionCache {
 
     private final World world;
 
-    private final ConcurrentHashMap<ChunkSectionPos, ClonedChunkSection> positionToEntry = new ConcurrentHashMap<>();
+    private final Long2ReferenceLinkedOpenHashMap<ClonedChunkSection> positionToEntry = new Long2ReferenceLinkedOpenHashMap<>();
 
     private long time; // updated once per frame to be the elapsed time since application start
 
@@ -28,19 +27,23 @@ public class ClonedChunkSectionCache {
 
     public void cleanup() {
         this.time = getMonotonicTimeSource();
-
-        // Remove expired entries
-        this.positionToEntry.entrySet().removeIf(entry -> this.time > (entry.getValue().getLastUsedTimestamp() + MAX_CACHE_DURATION));
+        this.positionToEntry.values()
+                .removeIf(entry -> this.time > (entry.getLastUsedTimestamp() + MAX_CACHE_DURATION));
     }
 
     @Nullable
     public ClonedChunkSection acquire(int x, int y, int z) {
-        ChunkSectionPos chunkSectionPos = ChunkSectionPos.from(x, y, z);
-        ClonedChunkSection section = this.positionToEntry.get(chunkSectionPos);
+        var pos = ChunkSectionPos.asLong(x, y, z);
+        var section = this.positionToEntry.getAndMoveToLast(pos);
 
         if (section == null) {
             section = this.clone(x, y, z);
-            this.positionToEntry.put(chunkSectionPos, section);
+
+            while (this.positionToEntry.size() >= MAX_CACHE_SIZE) {
+                this.positionToEntry.removeFirst();
+            }
+
+            this.positionToEntry.putAndMoveToLast(pos, section);
         }
 
         section.setLastUsedTimestamp(this.time);
@@ -62,11 +65,11 @@ public class ClonedChunkSectionCache {
             section = chunk.getSectionArray()[this.world.sectionCoordToIndex(y)];
         }
 
-        return new ClonedChunkSection(this.world, chunk, section, chunkSectionPos);
+        return new ClonedChunkSection(this.world, chunk, section, ChunkSectionPos.from(x, y, z));
     }
 
     public void invalidate(int x, int y, int z) {
-        this.positionToEntry.remove(ChunkSectionPos.from(x, y, z));
+        this.positionToEntry.remove(ChunkSectionPos.asLong(x, y, z));
     }
 
     private static long getMonotonicTimeSource() {
