@@ -8,6 +8,7 @@ import net.minecraft.world.chunk.WorldChunk;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class ClonedChunkSectionCache {
@@ -16,7 +17,7 @@ public class ClonedChunkSectionCache {
 
     private final World world;
 
-    private final Long2ReferenceLinkedOpenHashMap<ClonedChunkSection> positionToEntry = new Long2ReferenceLinkedOpenHashMap<>();
+    private final ConcurrentHashMap<ChunkSectionPos, ClonedChunkSection> positionToEntry = new ConcurrentHashMap<>();
 
     private long time; // updated once per frame to be the elapsed time since application start
 
@@ -27,23 +28,19 @@ public class ClonedChunkSectionCache {
 
     public void cleanup() {
         this.time = getMonotonicTimeSource();
-        this.positionToEntry.values()
-                .removeIf(entry -> this.time > (entry.getLastUsedTimestamp() + MAX_CACHE_DURATION));
+
+        // Remove expired entries
+        this.positionToEntry.entrySet().removeIf(entry -> this.time > (entry.getValue().getLastUsedTimestamp() + MAX_CACHE_DURATION));
     }
 
     @Nullable
     public ClonedChunkSection acquire(int x, int y, int z) {
         var pos = ChunkSectionPos.asLong(x, y, z);
-        var section = this.positionToEntry.getAndMoveToLast(pos);
+        var section = this.positionToEntry.get(pos);
 
         if (section == null) {
             section = this.clone(x, y, z);
-
-            while (this.positionToEntry.size() >= MAX_CACHE_SIZE) {
-                this.positionToEntry.removeFirst();
-            }
-
-            this.positionToEntry.putAndMoveToLast(pos, section);
+            this.positionToEntry.put(pos, section);
         }
 
         section.setLastUsedTimestamp(this.time);
