@@ -35,12 +35,12 @@ public class ClonedChunkSectionCache {
 
     @Nullable
     public ClonedChunkSection acquire(int x, int y, int z) {
-        var pos = ChunkSectionPos.asLong(x, y, z);
-        var section = this.positionToEntry.get(pos);
+        ChunkSectionPos chunkSectionPos = ChunkSectionPos.from(x, y, z);
+        ClonedChunkSection section = this.positionToEntry.get(chunkSectionPos);
 
         if (section == null) {
             section = this.clone(x, y, z);
-            this.positionToEntry.put(pos, section);
+            this.positionToEntry.put(chunkSectionPos, section);
         }
 
         section.setLastUsedTimestamp(this.time);
@@ -62,11 +62,11 @@ public class ClonedChunkSectionCache {
             section = chunk.getSectionArray()[this.world.sectionCoordToIndex(y)];
         }
 
-        return new ClonedChunkSection(this.world, chunk, section, ChunkSectionPos.from(x, y, z));
+        return new ClonedChunkSection(this.world, chunk, section, chunkSectionPos);
     }
 
     public void invalidate(int x, int y, int z) {
-        this.positionToEntry.remove(ChunkSectionPos.asLong(x, y, z));
+        this.positionToEntry.remove(ChunkSectionPos.from(x, y, z));
     }
 
     private static long getMonotonicTimeSource() {
