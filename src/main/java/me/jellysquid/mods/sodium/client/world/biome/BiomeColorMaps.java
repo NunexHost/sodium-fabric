@@ -10,12 +10,19 @@ public class BiomeColorMaps {
     private static final int INVALID_INDEX = -1;
     private static final int DEFAULT_COLOR = 0xffff00ff;
 
+    private static int[] grassColors = null;
+    private static int[] foliageColors = null;
+
     public static int getGrassColor(int index) {
         if (index == INVALID_INDEX) {
             return DEFAULT_COLOR;
         }
 
-        return GrassColorsAccessor.getColorMap()[index];
+        if (grassColors == null) {
+            grassColors = GrassColorsAccessor.getColorMap().clone();
+        }
+
+        return grassColors[index];
     }
 
     public static int getFoliageColor(int index) {
@@ -23,7 +30,11 @@ public class BiomeColorMaps {
             return DEFAULT_COLOR;
         }
 
-        return FoliageColorsAccessor.getColorMap()[index];
+        if (foliageColors == null) {
+            foliageColors = FoliageColorsAccessor.getColorMap().clone();
+        }
+
+        return foliageColors[index];
     }
 
     public static int getIndex(double temperature, double humidity) {
@@ -41,5 +52,11 @@ public class BiomeColorMaps {
         }
 
         return (y << 8) | x;
+    }
+
+    static {
+        // Pre-calculate `getWidth()` and `getHeight()` to avoid repeated calls.
+        getWidth();
+        getHeight();
     }
 }
