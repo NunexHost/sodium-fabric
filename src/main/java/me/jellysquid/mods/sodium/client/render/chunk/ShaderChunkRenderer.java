@@ -44,7 +44,6 @@ public abstract class ShaderChunkRenderer implements ChunkRenderer {
 
         GlShader vertShader = ShaderLoader.loadShader(ShaderType.VERTEX,
                 new Identifier("sodium", path + ".vsh"), constants);
-        
         GlShader fragShader = ShaderLoader.loadShader(ShaderType.FRAGMENT,
                 new Identifier("sodium", path + ".fsh"), constants);
 
@@ -59,6 +58,28 @@ public abstract class ShaderChunkRenderer implements ChunkRenderer {
             vertShader.delete();
             fragShader.delete();
         }
-        
     }
-    
+
+    protected void begin(TerrainRenderPass pass) {
+        pass.startDrawing();
+
+        ChunkShaderOptions options = new ChunkShaderOptions(ChunkFogMode.SMOOTH, pass);
+
+        this.activeProgram = this.compileProgram(options);
+        this.activeProgram.bind();
+        this.activeProgram.getInterface().setupState();
+    }
+
+    protected void end(TerrainRenderPass pass) {
+        this.activeProgram.unbind();
+        this.activeProgram = null;
+
+        pass.endDrawing();
+    }
+
+    @Override
+    public void delete(CommandList commandList) {
+        this.programs.values()
+                .forEach(GlProgram::delete);
+    }
+}
