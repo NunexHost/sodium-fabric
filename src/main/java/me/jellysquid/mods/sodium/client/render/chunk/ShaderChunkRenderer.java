@@ -70,19 +70,19 @@ public abstract class ShaderChunkRenderer implements ChunkRenderer {
 //        this.activeProgram.bind();
 //        this.activeProgram.getInterface()
 //                .setupState();
-    }
+//    }
 
 //    protected void end(TerrainRenderPass pass) {
 //        this.activeProgram.unbind();
 //        this.activeProgram = null;
 
 //        pass.endDrawing();
-    }
+//    }
 
-    @Override
-    public void delete(CommandList commandList) {
-        this.programs.values()
-                .forEach(GlProgram::delete);
+//    @Override
+//    public void delete(CommandList commandList) {
+//        this.programs.values()
+ //               .forEach(GlProgram::delete);
     }
 
 }
