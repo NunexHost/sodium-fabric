@@ -59,7 +59,7 @@ public abstract class ShaderChunkRenderer implements ChunkRenderer {
             vertShader.delete();
             fragShader.delete();
         }
-    }
+//    }
 
 //    protected void begin(TerrainRenderPass pass) {
 //        pass.startDrawing();
