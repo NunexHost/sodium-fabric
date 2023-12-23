@@ -1,6 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.terrain;
 
-import net.minecraft.client.render.RenderLayer;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
 
 public class TerrainRenderPass {
     private final RenderLayer layer;
