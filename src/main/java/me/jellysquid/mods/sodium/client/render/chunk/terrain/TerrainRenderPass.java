@@ -3,7 +3,6 @@ package me.jellysquid.mods.sodium.client.render.chunk.terrain;
 import net.minecraft.client.render.RenderLayer;
 
 public class TerrainRenderPass {
-    @Deprecated(forRemoval = true)
     private final RenderLayer layer;
 
     private final boolean useReverseOrder;
@@ -20,14 +19,12 @@ public class TerrainRenderPass {
         return this.useReverseOrder;
     }
 
-    @Deprecated
-    public void startDrawing() {
-        this.layer.startDrawing();
-    }
-
-    @Deprecated
-    public void endDrawing() {
-        this.layer.endDrawing();
+    public void render(ChunkMeshBufferBuilder buffer) {
+        if (this.useReverseOrder) {
+            buffer.render(this.layer, ChunkMeshBufferBuilder.DrawMode.BACK, ChunkMeshBufferBuilder.DrawMode.FRONT);
+        } else {
+            buffer.render(this.layer, ChunkMeshBufferBuilder.DrawMode.FRONT, ChunkMeshBufferBuilder.DrawMode.BACK);
+        }
     }
 
     public boolean supportsFragmentDiscard() {
