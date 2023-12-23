@@ -61,22 +61,22 @@ public abstract class ShaderChunkRenderer implements ChunkRenderer {
         }
     }
 
-    protected void begin(TerrainRenderPass pass) {
-        pass.startDrawing();
+//    protected void begin(TerrainRenderPass pass) {
+//        pass.startDrawing();
 
-        ChunkShaderOptions options = new ChunkShaderOptions(ChunkFogMode.SMOOTH, pass);
+//        ChunkShaderOptions options = new ChunkShaderOptions(ChunkFogMode.SMOOTH, pass);
 
-        this.activeProgram = this.compileProgram(options);
-        this.activeProgram.bind();
-        this.activeProgram.getInterface()
-                .setupState();
+//        this.activeProgram = this.compileProgram(options);
+//        this.activeProgram.bind();
+//        this.activeProgram.getInterface()
+//                .setupState();
     }
 
-    protected void end(TerrainRenderPass pass) {
-        this.activeProgram.unbind();
-        this.activeProgram = null;
+//    protected void end(TerrainRenderPass pass) {
+//        this.activeProgram.unbind();
+//        this.activeProgram = null;
 
-        pass.endDrawing();
+//        pass.endDrawing();
     }
 
     @Override
