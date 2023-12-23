@@ -52,11 +52,6 @@ public class BiomeColorMaps {
         }
 
         return (y << 8) | x;
-    }
 
-    static {
-        // Pre-calculate `getWidth()` and `getHeight()` to avoid repeated calls.
-        getWidth();
-        getHeight();
     }
 }
