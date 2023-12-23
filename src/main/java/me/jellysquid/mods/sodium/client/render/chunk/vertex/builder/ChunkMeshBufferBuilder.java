@@ -53,7 +53,7 @@ public class ChunkMeshBufferBuilder {
         ByteBuffer newBuffer = MemoryUtil.memAllocDirect(cap * this.stride);
 
         // Copy the existing data to the new buffer
-        MemoryUtil.memCopy(this.buffer, 0, newBuffer, 0, this.count * this.stride);
+        MemoryUtil.memCopy(this.buffer, MemoryUtil.memAddress(this.buffer), newBuffer, MemoryUtil.memAddress(newBuffer), this.count * this.stride);
 
         // Update the references
         this.buffer = newBuffer;
